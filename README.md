@@ -105,10 +105,12 @@ The oracle image builds the same way; measure it with `--docker-uri oracle-encla
 
 ## Source
 
-This tree is an export of [Kaskad-Lending/kaskad-nuntius@3944e30](https://github.com/Kaskad-Lending/kaskad-nuntius/tree/3944e30d2636fbf7ab5fece99d0bc023034ebebb). Every exported file has the same git object id as in that commit.
+This tree is an export of [Kaskad-Lending/kaskad-nuntius@0f3865c](https://github.com/Kaskad-Lending/kaskad-nuntius/tree/0f3865c834495938b14bb7a951e5998331cac072). Every exported file has the same git object id as in that commit.
 
 - The live bridge image was built from that commit.
-- The live oracle image was built from its ancestor `dcfe989`. Every file `Dockerfile.oracle` reads, and every `KEYEX_ORACLE_*` value, is identical in both commits.
+- The live oracle image was built from its ancestor `6df59ad`. Every file `Dockerfile.oracle` reads, and every `KEYEX_ORACLE_*` value, is identical in both commits.
+
+Two places use the earlier ids of these commits: the commit message of `79c81b8` names `0f3865c` as `3944e30`, and `host/eif-config/robinhood-mainnet.env` names `6df59ad` as `dcfe989`.
 
 ## License
 
