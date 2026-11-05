@@ -35,26 +35,30 @@ All crates share one Cargo workspace and one `Cargo.lock`.
 
 ## Live images on Robinhood Chain (4663)
 
-| Image | Dockerfile | Pinned in | Registered signer |
+| Image | Dockerfile | Contract | Registered signer |
 |---|---|---|---|
 | Bridge | `Dockerfile.pontifex` | `KskdEntry` `0x7b1D080d2485E63791468d73418e2B262c25C402` | `0x7d3B23a631501a35cafe4F00133653A1b90f2CC3` |
 | Oracle | `Dockerfile.oracle` | `KaskadPriceOracleV2` `0xB4922b744cc395E05Cc962d55FA63FBab0599ec2` | `0xe4d88be9756eb3fc5bd28b81642605fbf238d2c9` |
 
 ```text
-bridge  PCR0 8761b33a338db4fab12c9201eef87e1c582310d59645848c2574061d1e070d71238976ea1af05ad4b4e645004621aac6
+bridge  PCR0 9edc0e6d71d3e797f407eb141532d0973f34ec566bf49bae0a61b975fa4b1fb7041b7e84fdb995d441703c2f70f2bc67
         PCR1 4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493
-        PCR2 053d5d61b98e960c777ea280b7b9550951d3b105689f23bb63d25a2afaf0ff3823ad240aff39f34437289e2761a4a2c1
-oracle  PCR0 5248a0d0ca1bea3044a270078286a7f788dfba98ada7069bdc4db81407e6a3a65c5be8f76e3cd299571621d71cc02296
+        PCR2 7d317a409c3c5333326bef388eab2fdc3b4d9bb1e908182891c52a8230565a12fcc9e41bab63d167694fea6143447679
+oracle  PCR0 d7b46b6b59833df30f2e72fc9bbb465dcb3f9d6365eccbafe0c5557975f4b8e0533f46abe9bd6809b3c7995965044d7d
         PCR1 4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493
-        PCR2 cb935649ecdfcff7944cd891ae8de97b91c1fd252faa38547c68eb8a447a0acee3ef3244309d38673df49cefce5c4a46
+        PCR2 0c6260d9e09e6252fd0ec33b83e32deda3f37926689622cb651bbf9138a199016b671f215aaee9056f2f6b6b0c858805
 ```
 
-Checked on 2026-10-15:
+These are the PCRs measured by the release build of each image on 2026-11-05.
 
-- Rebuilding both images from this source without Nitro hardware gives these PCR0, PCR1 and PCR2 values.
-- They equal the PCRs in the live attestation documents of both enclaves. Each document's signature chains to the AWS Nitro root certificate.
-- The first 32 bytes of each PCR0 equal `expectedPcr0()` of the contract that pins it.
-- Both signers are registered on chain (block 89212749): `KskdEntry.validSigner` and `KaskadPriceOracleV2.isValidSigner` return true.
+Checked on 2026-11-05 (block 107034121):
+
+- Both signers are registered on chain: `KskdEntry.validSigner` and `KaskadPriceOracleV2.isValidSigner` return true.
+- The PCR0 in the live bridge attestation documents equals the bridge PCR0 above.
+- `KaskadPriceOracleV2.expectedPcr0()` holds the first 32 bytes of the oracle PCR0 above. `KskdEntry.expectedPcr0()` still holds the first 32 bytes of the image version 1 bridge PCR0.
+- Image version 2 keeps the version 1 keys: the oracle receives its root key under a CARRY approval, and the bridge its derived key under a CHILD approval for its new PCR0. The signers stay the same.
+
+The checks of image version 1 are in the README at tag `robinhood-mainnet-v1`.
 
 ## Build
 
@@ -105,12 +109,10 @@ The oracle image builds the same way; measure it with `--docker-uri oracle-encla
 
 ## Source
 
-This tree is an export of [Kaskad-Lending/kaskad-nuntius@0f3865c](https://github.com/Kaskad-Lending/kaskad-nuntius/tree/0f3865c834495938b14bb7a951e5998331cac072). Every exported file has the same git object id as in that commit.
+This tree is an export of [Kaskad-Lending/kaskad-nuntius@005b71b](https://github.com/Kaskad-Lending/kaskad-nuntius/tree/005b71b6cd22c5b4163119d3128536502c6261f1). Every exported file has the same git object id as in that commit.
 
 - The live bridge image was built from that commit.
-- The live oracle image was built from its ancestor `6df59ad`. Every file `Dockerfile.oracle` reads, and every `KEYEX_ORACLE_*` value, is identical in both commits.
-
-Two places use the earlier ids of these commits: the commit message of `79c81b8` names `0f3865c` as `3944e30`, and `host/eif-config/robinhood-mainnet.env` names `6df59ad` as `dcfe989`.
+- The live oracle image was built from its parent `7e6b832`. The two commits differ only in the `PONTIFEX_ANCESTOR_PCRS` line of `host/eif-config/robinhood-mainnet.env` and its comment. Every file `Dockerfile.oracle` reads, and every `KEYEX_ORACLE_*` value, is identical in both commits.
 
 ## License
 
